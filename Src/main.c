@@ -158,7 +158,7 @@ int main(void)
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  LTDC_Init(FRAME_BUFFER, 0, 0, 320, 240);
+  LTDC_Init(FRAME_BUFFER, 10, 10, 320, 240);
 
   BSP_SDRAM_Init();
   
