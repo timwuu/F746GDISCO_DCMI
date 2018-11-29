@@ -48,15 +48,15 @@
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
-#define RK043FN48H_WIDTH 480
-#define RK043FN48H_HEIGHT 272
-#define RK043FN48H_HSYNC 41
-#define RK043FN48H_HBP 13
-#define RK043FN48H_HFP 32
-#define RK043FN48H_VSYNC 10
-#define RK043FN48H_VBP 2
-#define RK043FN48H_VFP 2
-#define RK043FN48H_FREQUENCY_DIVIDER 5
+#define mxRK043FN48H_WIDTH 480
+#define mxRK043FN48H_HEIGHT 272
+#define mxRK043FN48H_HSYNC 41
+#define mxRK043FN48H_HBP 13
+#define mxRK043FN48H_HFP 32
+#define mxRK043FN48H_VSYNC 10
+#define mxRK043FN48H_VBP 2
+#define mxRK043FN48H_VFP 2
+#define mxRK043FN48H_FREQUENCY_DIVIDER 5
 
 #define LCD_B0_Pin GPIO_PIN_4
 #define LCD_B0_GPIO_Port GPIOE
@@ -391,7 +391,7 @@
 /* #define USE_FULL_ASSERT    1U */
 
 /* USER CODE BEGIN Private defines */
-
+#define FRAME_BUFFER	0xC0000000
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
