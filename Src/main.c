@@ -114,7 +114,7 @@ static void MX_USART6_UART_Init(void);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 uint8_t CAMERA_Init(uint32_t );
-static void LTDC_Init2(uint32_t , uint16_t , uint16_t , uint16_t, uint16_t);
+static void LTDC_Init(uint32_t , uint16_t , uint16_t , uint16_t, uint16_t);
 void LCD_GPIO_Init(LTDC_HandleTypeDef *, void *);
 /* USER CODE END PFP */
 
@@ -154,16 +154,14 @@ int main(void)
   MX_DMA_Init();
   MX_DCMI_Init();
   MX_DMA2D_Init();
-  MX_FMC_Init();
-  MX_LTDC_Init();
   MX_USART1_UART_Init();
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  LTDC_Init2(FRAME_BUFFER, 0, 0, 320, 240);
+  LTDC_Init(FRAME_BUFFER, 0, 0, 320, 240);
 
   BSP_SDRAM_Init();
-
+  
   CAMERA_Init(CAMERA_R320x240);
 
   HAL_Delay(1000);  //Delay for the camera to output correct data
@@ -929,7 +927,7 @@ manually controlled */
   HAL_GPIO_Init(GPIOK, &gpio_init_structure);
 }
 
-static void LTDC_Init2(uint32_t FB_Address, uint16_t Xpos, uint16_t Ypos,
+static void LTDC_Init(uint32_t FB_Address, uint16_t Xpos, uint16_t Ypos,
                       uint16_t Width, uint16_t Height)
 {
   /* Timing Configuration */

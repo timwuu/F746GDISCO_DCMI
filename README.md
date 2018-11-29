@@ -25,6 +25,7 @@ Notes:
 3. put font24.c in src folder, and no need to include the file in main.c
 4. the LCD-TFT might burn if using the 320x240 resolution
 5. some issues with STM32CubeMX code regeneration
+6. in STM32CubeMX project settings, don't generate function calls for FMC and LTDC modules
 
 2018.11.28
 1. generate codes with STM32CubeMX and add device files 
