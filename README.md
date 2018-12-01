@@ -27,5 +27,8 @@ Notes:
 5. some issues with STM32CubeMX code regeneration
 6. in STM32CubeMX project settings, don't generate function calls for FMC and LTDC modules
 
+2018.12.01
+1. changed to using BSP LCD module.
+
 2018.11.28
 1. generate codes with STM32CubeMX and add device files 
