@@ -43,6 +43,7 @@
 /* USER CODE BEGIN Includes */
 #include "stm32746g_discovery.h"
 #include "stm32746g_discovery_lcd.h"
+#include "stm32746g_discovery_camera.h"
 #include "ov9655.h"
 /* USER CODE END Includes */
 
@@ -62,19 +63,6 @@ SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-typedef enum
-{
-  CAMERA_OK = 0x00,
-  CAMERA_ERROR = 0x01,
-  CAMERA_TIMEOUT = 0x02,
-  CAMERA_NOT_DETECTED = 0x03,
-  CAMERA_NOT_SUPPORTED = 0x04
-} Camera_StatusTypeDef;
-
-CAMERA_DrvTypeDef *camera_driv;
-
-/* Camera module I2C HW address */
-static uint32_t CameraHwAddress;
 
 /* Image size */
 uint32_t Im_size = 0;
@@ -94,7 +82,6 @@ static void MX_USART6_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-uint8_t CAMERA_Init(uint32_t );
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -131,7 +118,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_DCMI_Init();
+  //MX_DCMI_Init();
   MX_DMA2D_Init();
   MX_USART1_UART_Init();
   MX_USART6_UART_Init();
@@ -142,23 +129,25 @@ int main(void)
 //  BSP_LCD_SetXSize(320);
 //  BSP_LCD_SetYSize(240);
   BSP_LCD_LayerRgb565Init(1, (uint32_t)FRAME_BUFFER);
-  BSP_LCD_SetLayerWindow(1, 20, 20, 320, 240);
+  BSP_LCD_SetLayerWindow(1, 0, 0, 480, 272);
   BSP_LCD_DisplayOn();
 
   //LTDC_Init(FRAME_BUFFER, 10, 10, 320, 240);
 
   //BSP_SDRAM_Init();
   
-  CAMERA_Init(CAMERA_R320x240);
+  BSP_CAMERA_Init(CAMERA_R480x272);
 
   HAL_Delay(1000);  //Delay for the camera to output correct data
-  Im_size = 0x9600; //size=320*240*2/4
+  //Im_size = 0x9600; //size=320*240*2/4
+  Im_size = 0xFF00; //size=480*272*2/4
 
   /* uncomment the following line in case of snapshot mode */
   //HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t)FRAME_BUFFER, Im_size);
 
   /* uncomment the following line in case of continuous mode */
-  HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_CONTINUOUS, (uint32_t)FRAME_BUFFER, Im_size);
+  //HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_CONTINUOUS, (uint32_t)FRAME_BUFFER, Im_size);
+  BSP_CAMERA_ContinuousStart((uint8_t *)FRAME_BUFFER);
 
   /* USER CODE END 2 */
 
@@ -858,150 +847,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
-// void LCD_GPIO_Init(LTDC_HandleTypeDef *hltdc, void *Params)
-// {
-//   GPIO_InitTypeDef gpio_init_structure;
-//   /* Enable the LTDC and DMA2D clocks */
-//   __HAL_RCC_LTDC_CLK_ENABLE();
-//   __HAL_RCC_DMA2D_CLK_ENABLE();
-//   /* Enable GPIOs clock */
-//   __HAL_RCC_GPIOE_CLK_ENABLE();
-//   __HAL_RCC_GPIOG_CLK_ENABLE();
-//   __HAL_RCC_GPIOI_CLK_ENABLE();
-//   __HAL_RCC_GPIOJ_CLK_ENABLE();
-//   __HAL_RCC_GPIOK_CLK_ENABLE();
-//   /*** LTDC Pins configuration ***/
-//   /* GPIOE configuration */
-//   gpio_init_structure.Pin = GPIO_PIN_4;
-//   gpio_init_structure.Mode = GPIO_MODE_AF_PP;
-//   gpio_init_structure.Pull = GPIO_NOPULL;
-//   gpio_init_structure.Speed = GPIO_SPEED_FAST;
-//   gpio_init_structure.Alternate = GPIO_AF14_LTDC;
-//   HAL_GPIO_Init(GPIOE, &gpio_init_structure);
-//   /* GPIOG configuration */
-//   gpio_init_structure.Pin = GPIO_PIN_12;
-//   gpio_init_structure.Mode = GPIO_MODE_AF_PP;
-//   gpio_init_structure.Alternate = GPIO_AF9_LTDC;
-//   HAL_GPIO_Init(GPIOG, &gpio_init_structure);
-//   /* GPIOI LTDC alternate configuration */
-//   gpio_init_structure.Pin = GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_13 |
-//                             GPIO_PIN_14 | GPIO_PIN_15;
-//   gpio_init_structure.Mode = GPIO_MODE_AF_PP;
-//   gpio_init_structure.Alternate = GPIO_AF14_LTDC;
-//   HAL_GPIO_Init(GPIOI, &gpio_init_structure);
-//   /* GPIOJ configuration */
-//   gpio_init_structure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 |
-//                             GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 |
-//                             GPIO_PIN_11 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
-//   gpio_init_structure.Mode = GPIO_MODE_AF_PP;
-//   gpio_init_structure.Alternate = GPIO_AF14_LTDC;
-//   HAL_GPIO_Init(GPIOJ, &gpio_init_structure);
-//   /* GPIOK configuration */
-//   gpio_init_structure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 |
-//                             GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
-//   gpio_init_structure.Mode = GPIO_MODE_AF_PP;
-//   gpio_init_structure.Alternate = GPIO_AF14_LTDC;
-//   HAL_GPIO_Init(GPIOK, &gpio_init_structure);
-//   /* LCD_DISP GPIO configuration */
-//   gpio_init_structure.Pin = GPIO_PIN_12; /* LCD_DISP pin has to be
-// manually controlled */
-//   gpio_init_structure.Mode = GPIO_MODE_OUTPUT_PP;
-//   HAL_GPIO_Init(GPIOI, &gpio_init_structure);
-//   /* LCD_BL_CTRL GPIO configuration */
-//   gpio_init_structure.Pin = GPIO_PIN_3; /* LCD_BL_CTRL pin has to be
-// manually controlled */
-//   gpio_init_structure.Mode = GPIO_MODE_OUTPUT_PP;
-//   HAL_GPIO_Init(GPIOK, &gpio_init_structure);
-// }
-
-// static void LTDC_Init(uint32_t FB_Address, uint16_t Xpos, uint16_t Ypos,
-//                       uint16_t Width, uint16_t Height)
-// {
-//   /* Timing Configuration */
-//   hltdc.Init.HorizontalSync = (RK043FN48H_HSYNC - 1);
-//   hltdc.Init.VerticalSync = (RK043FN48H_VSYNC - 1);
-//   hltdc.Init.AccumulatedHBP = (RK043FN48H_HSYNC + RK043FN48H_HBP - 1);
-//   hltdc.Init.AccumulatedVBP = (RK043FN48H_VSYNC + RK043FN48H_VBP - 1);
-//   hltdc.Init.AccumulatedActiveH = (RK043FN48H_HEIGHT + RK043FN48H_VSYNC +
-//                                    RK043FN48H_VBP - 1);
-//   hltdc.Init.AccumulatedActiveW = (RK043FN48H_WIDTH + RK043FN48H_HSYNC +
-//                                    RK043FN48H_HBP - 1);
-//   hltdc.Init.TotalHeigh = (RK043FN48H_HEIGHT + RK043FN48H_VSYNC +
-//                            RK043FN48H_VBP + RK043FN48H_VFP - 1);
-//   hltdc.Init.TotalWidth = (RK043FN48H_WIDTH + RK043FN48H_HSYNC +
-//                            RK043FN48H_HBP + RK043FN48H_HFP - 1);
-//   /* LCD clock configuration */
-//   periph_clk_init_struct.PeriphClockSelection = RCC_PERIPHCLK_LTDC;
-//   periph_clk_init_struct.PLLSAI.PLLSAIN = 192;
-//   periph_clk_init_struct.PLLSAI.PLLSAIR = RK043FN48H_FREQUENCY_DIVIDER;
-//   periph_clk_init_struct.PLLSAIDivR = RCC_PLLSAIDIVR_4;
-//   HAL_RCCEx_PeriphCLKConfig(&periph_clk_init_struct);
-//   /* Initialize the LCD pixel width and pixel height */
-//   hltdc.LayerCfg->ImageWidth = RK043FN48H_WIDTH;
-//   hltdc.LayerCfg->ImageHeight = RK043FN48H_HEIGHT;
-//   hltdc.Init.Backcolor.Blue = 0; /* Background value */
-//   hltdc.Init.Backcolor.Green = 0;
-//   hltdc.Init.Backcolor.Red = 0;
-//   /* Polarity */
-//   hltdc.Init.HSPolarity = LTDC_HSPOLARITY_AL;
-//   hltdc.Init.VSPolarity = LTDC_VSPOLARITY_AL;
-//   hltdc.Init.DEPolarity = LTDC_DEPOLARITY_AL;
-//   hltdc.Init.PCPolarity = LTDC_PCPOLARITY_IPC;
-//   hltdc.Instance = LTDC;
-//   if (HAL_LTDC_GetState(&hltdc) == HAL_LTDC_STATE_RESET)
-//   {
-//     LCD_GPIO_Init(&hltdc, NULL);
-//   }
-//   HAL_LTDC_Init(&hltdc);
-//   /* Assert display enable LCD_DISP pin */
-//   HAL_GPIO_WritePin(GPIOI, GPIO_PIN_12, GPIO_PIN_SET);
-//   /* Assert backlight LCD_BL_CTRL pin */
-//   HAL_GPIO_WritePin(GPIOK, GPIO_PIN_3, GPIO_PIN_SET);
-//   DrawProp[0].pFont = &Font24;
-//   /* Layer Init */
-//   layer_cfg.WindowX0 = Xpos;
-//   layer_cfg.WindowX1 = Width;
-//   layer_cfg.WindowY0 = Ypos;
-//   layer_cfg.WindowY1 = Height;
-//   layer_cfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB565;
-//   layer_cfg.FBStartAdress = FB_Address;
-//   layer_cfg.Alpha = 255;
-//   layer_cfg.Alpha0 = 0;
-//   layer_cfg.Backcolor.Blue = 0;
-//   layer_cfg.Backcolor.Green = 0;
-//   layer_cfg.Backcolor.Red = 0;
-//   layer_cfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_PAxCA;
-//   layer_cfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_PAxCA;
-//   layer_cfg.ImageWidth = Width;
-//   layer_cfg.ImageHeight = Height;
-//   HAL_LTDC_ConfigLayer(&hltdc, &layer_cfg, 1);
-//   DrawProp[1].BackColor = ((uint32_t)0xFFFFFFFF);
-//   DrawProp[1].pFont = &Font24;
-//   DrawProp[1].TextColor = ((uint32_t)0xFF000000);
-// }
-
-uint8_t CAMERA_Init(uint32_t Resolution) /*Camera initialization*/
-{
-  uint8_t status = CAMERA_ERROR;
-  /* Read ID of Camera module via I2C */
-  if (ov9655_ReadID(CAMERA_I2C_ADDRESS) == OV9655_ID)
-  {
-    camera_driv = &ov9655_drv; /* Initialize the camera driver structure */
-    CameraHwAddress = CAMERA_I2C_ADDRESS;
-    if (Resolution == CAMERA_R320x240)
-    {
-      camera_driv->Init(CameraHwAddress, Resolution);
-      HAL_DCMI_DisableCROP(&hdcmi);
-    }
-    status = CAMERA_OK; /* Return CAMERA_OK status */
-  }
-  else
-  {
-    status = CAMERA_NOT_SUPPORTED; /* Return CAMERA_NOT_SUPPORTED status */
-  }
-  return status;
-}
 
 /* USER CODE END 4 */
 
