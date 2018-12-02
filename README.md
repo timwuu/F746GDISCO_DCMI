@@ -10,7 +10,7 @@ Camera Module:
 2. Frame Rate
 3. Data Format
 4. Scaling Image Output:
-The OV9656 is capable of scaling down the image size from VGA to 40x30. By using register bits 
+The OV9655 is capable of scaling down the image size from VGA to 40x30. By using register bits 
     * COM14[1] (0x3E)
     * COM16[0] (0x41)
     * POIDX (0x72)
