@@ -27,6 +27,11 @@ Notes:
 5. some issues with STM32CubeMX code regeneration
 6. in STM32CubeMX project settings, don't generate function calls for FMC and LTDC modules
 
+
+2018.12.03
+1. changed to double-buffer mode to use two banks of SDRAM, only supports Length <=0xFFFF
+2. added MPU configuration according to AN4861 LTDC 6.2.7
+
 2018.12.02
 1. changed to using BSP Camera module and it uses HAL_DCMI_ConfigCROP to get a 480x272 image.
 

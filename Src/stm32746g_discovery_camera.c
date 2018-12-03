@@ -241,6 +241,18 @@ void BSP_CAMERA_ContinuousStart(uint8_t *buff)
 }
 
 /**
+  * @brief  Starts the camera capture in continuous mode with double-buffer.
+  * @param  buff: pointer to the camera output buffer
+  * @param  second_buff: pointer to the second camera output buffer
+  * @retval None
+  */
+void BSP_CAMERA_ContinuousStart_DBM(uint8_t *buff, uint8_t *second_buff)
+{
+  /* Start the camera capture */
+  HAL_DCMI_Start_DMA_DBM(&hDcmiHandler, DCMI_MODE_CONTINUOUS, (uint32_t)buff, (uint32_t)second_buff, GetSize(CameraCurrentResolution));
+}
+
+/**
   * @brief  Starts the camera capture in snapshot mode.
   * @param  buff: pointer to the camera output buffer
   * @retval None
